@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teczi - Plataforma de Cursos en Línea</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>🎓 Teczi</h1>
+                    <p class="tagline">Aprende sin límites</p>
+                </div>
+                <nav class="nav">
+                    <button class="nav-btn active" onclick="mostrarSeccion('cursos')">Cursos</button>
+                    <button class="nav-btn" onclick="mostrarSeccion('alumnos')">Alumnos</button>
+                    <button class="nav-btn" onclick="mostrarSeccion('inscripciones')">Inscripciones</button>
+                    <button class="nav-btn" onclick="mostrarSeccion('estadisticas')">Estadísticas</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Sección de Cursos -->
+            <section id="seccion-cursos" class="seccion active">
+                <div class="seccion-header">
+                    <h2>📚 Catálogo de Cursos</h2>
+                    <button class="btn-primary" onclick="mostrarModalNuevoCurso()">+ Nuevo Curso</button>
+                </div>
+                <div id="cursos-grid" class="cursos-grid">
+                    <div class="loading">Cargando cursos...</div>
+                </div>
+            </section>
+
+            <!-- Sección de Alumnos -->
+            <section id="seccion-alumnos" class="seccion">
+                <div class="seccion-header">
+                    <h2>👥 Alumnos Registrados</h2>
+                    <button class="btn-primary" onclick="mostrarModalNuevoAlumno()">+ Registrar Alumno</button>
+                </div>
+                <div id="alumnos-lista" class="tabla-container">
+                    <div class="loading">Cargando alumnos...</div>
+                </div>
+            </section>
+
+            <!-- Sección de Inscripciones -->
+            <section id="seccion-inscripciones" class="seccion">
+                <div class="seccion-header">
+                    <h2>📝 Inscripciones</h2>
+                    <button class="btn-primary" onclick="mostrarModalNuevaInscripcion()">+ Nueva Inscripción</button>
+                </div>
+                <div id="inscripciones-lista" class="tabla-container">
+                    <div class="loading">Cargando inscripciones...</div>
+                </div>
+            </section>
+
+            <!-- Sección de Estadísticas -->
+            <section id="seccion-estadisticas" class="seccion">
+                <div class="seccion-header">
+                    <h2>📊 Estadísticas del Sistema</h2>
+                </div>
+                <div id="estadisticas-cards" class="estadisticas-grid">
+                    <div class="loading">Cargando estadísticas...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal para Nuevo Curso -->
+    <div id="modal-nuevo-curso" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Crear Nuevo Curso</h3>
+                <button class="modal-close" onclick="cerrarModal('modal-nuevo-curso')">&times;</button>
+            </div>
+            <form id="form-nuevo-curso" onsubmit="crearCurso(event)">
+                <div class="form-group">
+                    <label>Nombre del Curso *</label>
+                    <input type="text" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea name="descripcion" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Duración (horas)</label>
+                        <input type="number" name="duracion_horas" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Precio (S/)</label>
+                        <input type="number" name="precio" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Instructor</label>
+                    <input type="text" name="instructor">
+                </div>
+                <div class="form-group">
+                    <label>URL de Imagen</label>
+                    <input type="text" name="imagen_url">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modal-nuevo-curso')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Crear Curso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Nuevo Alumno -->
+    <div id="modal-nuevo-alumno" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Registrar Nuevo Alumno</h3>
+                <button class="modal-close" onclick="cerrarModal('modal-nuevo-alumno')">&times;</button>
+            </div>
+            <form id="form-nuevo-alumno" onsubmit="crearAlumno(event)">
+                <div class="form-group">
+                    <label>Nombre Completo *</label>
+                    <input type="text" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" name="telefono">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modal-nuevo-alumno')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Registrar Alumno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Nueva Inscripción -->
+    <div id="modal-nueva-inscripcion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Inscripción</h3>
+                <button class="modal-close" onclick="cerrarModal('modal-nueva-inscripcion')">&times;</button>
+            </div>
+            <form id="form-nueva-inscripcion" onsubmit="crearInscripcion(event)">
+                <div class="form-group">
+                    <label>Seleccionar Alumno *</label>
+                    <select name="alumno_id" id="select-alumno" required>
+                        <option value="">-- Seleccione un alumno --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Seleccionar Curso *</label>
+                    <select name="curso_id" id="select-curso" required>
+                        <option value="">-- Seleccione un curso --</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="cerrarModal('modal-nueva-inscripcion')">Cancelar</button>
+                    <button type="submit" class="btn-primary">Inscribir</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast para notificaciones -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
