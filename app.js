@@ -1,5 +1,5 @@
 // Configuración de la API - CAMBIAR POR LA IP PRIVADA DE TU INSTANCIA EC2 BACKEND
-const API_URL = "http://10.0.3.25:5000" // Reemplazar con la IP privada de tu EC2 backend
+const API_URL = "http://10.0.2.239:5000" // Reemplazar con la IP privada de tu EC2 backend
 
 // Datos de ejemplo para demostración
 const CURSOS_EJEMPLO = [
