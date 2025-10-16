@@ -1,5 +1,5 @@
 // Configuración de la API - CAMBIAR POR LA IP PRIVADA DE TU INSTANCIA EC2 BACKEND
-const API_URL = "http://10.0.2.239:5000" // Reemplazar con la IP privada de tu EC2 backend
+const API_URL = "http://10.0.3.25:5000" // Reemplazar con la IP privada de tu EC2 backend
 
 // Datos de ejemplo para demostración
 const CURSOS_EJEMPLO = [
@@ -59,10 +59,106 @@ const CURSOS_EJEMPLO = [
   },
 ]
 
+const ALUMNOS_EJEMPLO = [
+  {
+    id: 1,
+    nombre: "Juan Pérez García",
+    email: "juan.perez@email.com",
+    telefono: "+51 987 654 321",
+    fecha_registro: "2024-01-15T10:30:00",
+  },
+  {
+    id: 2,
+    nombre: "María López Sánchez",
+    email: "maria.lopez@email.com",
+    telefono: "+51 965 432 198",
+    fecha_registro: "2024-01-20T14:15:00",
+  },
+  {
+    id: 3,
+    nombre: "Carlos Rodríguez Vega",
+    email: "carlos.rodriguez@email.com",
+    telefono: "+51 912 345 678",
+    fecha_registro: "2024-02-05T09:00:00",
+  },
+  {
+    id: 4,
+    nombre: "Ana Martínez Torres",
+    email: "ana.martinez@email.com",
+    telefono: "+51 998 765 432",
+    fecha_registro: "2024-02-10T16:45:00",
+  },
+  {
+    id: 5,
+    nombre: "Luis Fernández Castro",
+    email: "luis.fernandez@email.com",
+    telefono: "+51 923 456 789",
+    fecha_registro: "2024-02-18T11:20:00",
+  },
+]
+
+const INSCRIPCIONES_EJEMPLO = [
+  {
+    id: 1,
+    alumno_nombre: "Juan Pérez García",
+    alumno_email: "juan.perez@email.com",
+    curso_nombre: "Desarrollo Web Full Stack",
+    instructor: "Carlos Mendoza",
+    fecha_inscripcion: "2024-02-01T10:00:00",
+    estado: "activo",
+  },
+  {
+    id: 2,
+    alumno_nombre: "María López Sánchez",
+    alumno_email: "maria.lopez@email.com",
+    curso_nombre: "Python para Data Science",
+    instructor: "Ana García",
+    fecha_inscripcion: "2024-02-03T14:30:00",
+    estado: "activo",
+  },
+  {
+    id: 3,
+    alumno_nombre: "Carlos Rodríguez Vega",
+    alumno_email: "carlos.rodriguez@email.com",
+    curso_nombre: "AWS Cloud Practitioner",
+    instructor: "Roberto Silva",
+    fecha_inscripcion: "2024-02-08T09:15:00",
+    estado: "completado",
+  },
+  {
+    id: 4,
+    alumno_nombre: "Ana Martínez Torres",
+    alumno_email: "ana.martinez@email.com",
+    curso_nombre: "React y Next.js Avanzado",
+    instructor: "Laura Martínez",
+    fecha_inscripcion: "2024-02-12T16:00:00",
+    estado: "activo",
+  },
+  {
+    id: 5,
+    alumno_nombre: "Luis Fernández Castro",
+    alumno_email: "luis.fernandez@email.com",
+    curso_nombre: "DevOps y CI/CD",
+    instructor: "Miguel Torres",
+    fecha_inscripcion: "2024-02-20T11:45:00",
+    estado: "activo",
+  },
+  {
+    id: 6,
+    alumno_nombre: "Juan Pérez García",
+    alumno_email: "juan.perez@email.com",
+    curso_nombre: "Bases de Datos PostgreSQL",
+    instructor: "Patricia Ruiz",
+    fecha_inscripcion: "2024-02-22T13:30:00",
+    estado: "activo",
+  },
+]
+
 // Estado global
 let cursosData = []
 let alumnosData = []
 let inscripcionesData = []
+let backendDisponible = false
 
 // ==================== FUNCIONES DE NAVEGACIÓN ====================
 
@@ -103,13 +199,16 @@ async function cargarCursos() {
     if (!response.ok) throw new Error("Error al cargar cursos")
 
     cursosData = await response.json()
+    backendDisponible = true
     renderizarCursos(cursosData)
   } catch (error) {
     console.error("Error:", error)
-    console.log("⚠️ Mostrando cursos de ejemplo (backend no disponible)")
     cursosData = CURSOS_EJEMPLO
     renderizarCursos(cursosData)
-    mostrarToast("⚠️ Mostrando cursos de ejemplo", "warning")
+    if (!backendDisponible) {
+      mostrarToast("Modo demostración - Datos de ejemplo", "warning")
+      backendDisponible = false
+    }
   }
 }
 
@@ -187,49 +286,60 @@ async function cargarAlumnos() {
     if (!response.ok) throw new Error("Error al cargar alumnos")
 
     alumnosData = await response.json()
-
-    if (alumnosData.length === 0) {
-      container.innerHTML = '<div class="loading">No hay alumnos registrados</div>'
-      return
-    }
-
-    container.innerHTML = `
-            <table class="tabla">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Teléfono</th>
-                        <th>Fecha Registro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${alumnosData
-                      .map(
-                        (alumno) => `
-                        <tr>
-                            <td>${alumno.id}</td>
-                            <td><strong>${alumno.nombre}</strong></td>
-                            <td>${alumno.email || "-"}</td>
-                            <td>${alumno.telefono || "-"}</td>
-                            <td>${new Date(alumno.fecha_registro).toLocaleDateString("es-PE")}</td>
-                        </tr>
-                    `,
-                      )
-                      .join("")}
-                </tbody>
-            </table>
-        `
+    renderizarAlumnos(alumnosData)
   } catch (error) {
     console.error("Error:", error)
-    container.innerHTML = '<div class="loading">❌ Error al cargar alumnos</div>'
-    mostrarToast("Error al cargar alumnos", "error")
+    alumnosData = ALUMNOS_EJEMPLO
+    renderizarAlumnos(alumnosData)
   }
+}
+
+function renderizarAlumnos(alumnos) {
+  const container = document.getElementById("alumnos-lista")
+
+  if (alumnos.length === 0) {
+    container.innerHTML = '<div class="loading">No hay alumnos registrados</div>'
+    return
+  }
+
+  container.innerHTML = `
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Fecha Registro</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${alumnos
+          .map(
+            (alumno) => `
+          <tr>
+            <td>${alumno.id}</td>
+            <td><strong>${alumno.nombre}</strong></td>
+            <td>${alumno.email || "-"}</td>
+            <td>${alumno.telefono || "-"}</td>
+            <td>${new Date(alumno.fecha_registro).toLocaleDateString("es-PE")}</td>
+          </tr>
+        `,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `
 }
 
 async function crearAlumno(event) {
   event.preventDefault()
+
+  if (!backendDisponible) {
+    mostrarToast("Función no disponible en modo demostración", "warning")
+    return
+  }
+
   const form = event.target
   const formData = new FormData(form)
 
@@ -248,13 +358,13 @@ async function crearAlumno(event) {
 
     if (!response.ok) throw new Error("Error al registrar alumno")
 
-    mostrarToast("✅ Alumno registrado exitosamente", "success")
+    mostrarToast("Alumno registrado exitosamente", "success")
     cerrarModal("modal-nuevo-alumno")
     form.reset()
     cargarAlumnos()
   } catch (error) {
     console.error("Error:", error)
-    mostrarToast("❌ Error al registrar alumno", "error")
+    mostrarToast("Error al registrar alumno", "error")
   }
 }
 
@@ -269,57 +379,72 @@ async function cargarInscripciones() {
     if (!response.ok) throw new Error("Error al cargar inscripciones")
 
     inscripcionesData = await response.json()
-
-    if (inscripcionesData.length === 0) {
-      container.innerHTML = '<div class="loading">No hay inscripciones registradas</div>'
-      return
-    }
-
-    container.innerHTML = `
-            <table class="tabla">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Alumno</th>
-                        <th>Email</th>
-                        <th>Curso</th>
-                        <th>Instructor</th>
-                        <th>Fecha</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${inscripcionesData
-                      .map(
-                        (insc) => `
-                        <tr>
-                            <td>${insc.id}</td>
-                            <td><strong>${insc.alumno_nombre}</strong></td>
-                            <td>${insc.alumno_email || "-"}</td>
-                            <td>${insc.curso_nombre}</td>
-                            <td>${insc.instructor}</td>
-                            <td>${new Date(insc.fecha_inscripcion).toLocaleDateString("es-PE")}</td>
-                            <td><span class="badge badge-${insc.estado}">${insc.estado}</span></td>
-                            <td>
-                                <button class="btn-danger" onclick="eliminarInscripcion(${insc.id})">Eliminar</button>
-                            </td>
-                        </tr>
-                    `,
-                      )
-                      .join("")}
-                </tbody>
-            </table>
-        `
+    renderizarInscripciones(inscripcionesData)
   } catch (error) {
     console.error("Error:", error)
-    container.innerHTML = '<div class="loading">❌ Error al cargar inscripciones</div>'
-    mostrarToast("Error al cargar inscripciones", "error")
+    inscripcionesData = INSCRIPCIONES_EJEMPLO
+    renderizarInscripciones(inscripcionesData)
   }
+}
+
+function renderizarInscripciones(inscripciones) {
+  const container = document.getElementById("inscripciones-lista")
+
+  if (inscripciones.length === 0) {
+    container.innerHTML = '<div class="loading">No hay inscripciones registradas</div>'
+    return
+  }
+
+  container.innerHTML = `
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Alumno</th>
+          <th>Email</th>
+          <th>Curso</th>
+          <th>Instructor</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          ${backendDisponible ? "<th>Acciones</th>" : ""}
+        </tr>
+      </thead>
+      <tbody>
+        ${inscripciones
+          .map(
+            (insc) => `
+          <tr>
+            <td>${insc.id}</td>
+            <td><strong>${insc.alumno_nombre}</strong></td>
+            <td>${insc.alumno_email || "-"}</td>
+            <td>${insc.curso_nombre}</td>
+            <td>${insc.instructor}</td>
+            <td>${new Date(insc.fecha_inscripcion).toLocaleDateString("es-PE")}</td>
+            <td><span class="badge badge-${insc.estado}">${insc.estado}</span></td>
+            ${
+              backendDisponible
+                ? `<td>
+                <button class="btn-danger" onclick="eliminarInscripcion(${insc.id})">Eliminar</button>
+              </td>`
+                : ""
+            }
+          </tr>
+        `,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `
 }
 
 async function crearInscripcion(event) {
   event.preventDefault()
+
+  if (!backendDisponible) {
+    mostrarToast("Función no disponible en modo demostración", "warning")
+    return
+  }
+
   const form = event.target
   const formData = new FormData(form)
 
@@ -340,13 +465,13 @@ async function crearInscripcion(event) {
       throw new Error(error.error || "Error al crear inscripción")
     }
 
-    mostrarToast("✅ Inscripción registrada exitosamente", "success")
+    mostrarToast("Inscripción registrada exitosamente", "success")
     cerrarModal("modal-nueva-inscripcion")
     form.reset()
     cargarInscripciones()
   } catch (error) {
     console.error("Error:", error)
-    mostrarToast(`❌ ${error.message}`, "error")
+    mostrarToast(`${error.message}`, "error")
   }
 }
 
@@ -360,11 +485,11 @@ async function eliminarInscripcion(id) {
 
     if (!response.ok) throw new Error("Error al eliminar inscripción")
 
-    mostrarToast("✅ Inscripción eliminada", "success")
+    mostrarToast("Inscripción eliminada", "success")
     cargarInscripciones()
   } catch (error) {
     console.error("Error:", error)
-    mostrarToast("❌ Error al eliminar inscripción", "error")
+    mostrarToast("Error al eliminar inscripción", "error")
   }
 }
 
@@ -379,48 +504,74 @@ async function cargarEstadisticas() {
     if (!response.ok) throw new Error("Error al cargar estadísticas")
 
     const stats = await response.json()
-
-    container.innerHTML = `
-            <div class="stat-card">
-                <div class="stat-icon">📚</div>
-                <div class="stat-label">Total de Cursos</div>
-                <div class="stat-value">${stats.total_cursos}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-label">Total de Alumnos</div>
-                <div class="stat-value">${stats.total_alumnos}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📝</div>
-                <div class="stat-label">Inscripciones Activas</div>
-                <div class="stat-value">${stats.inscripciones_activas}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">🏆</div>
-                <div class="stat-label">Curso Más Popular</div>
-                <div class="stat-value" style="font-size: 18px;">${stats.curso_mas_popular?.nombre || "N/A"}</div>
-                <div class="stat-label">${stats.curso_mas_popular?.total_inscripciones || 0} inscripciones</div>
-            </div>
-        `
+    renderizarEstadisticas(stats)
   } catch (error) {
     console.error("Error:", error)
-    container.innerHTML = '<div class="loading">❌ Error al cargar estadísticas</div>'
-    mostrarToast("Error al cargar estadísticas", "error")
+    const statsEjemplo = {
+      total_cursos: CURSOS_EJEMPLO.length,
+      total_alumnos: ALUMNOS_EJEMPLO.length,
+      inscripciones_activas: INSCRIPCIONES_EJEMPLO.filter((i) => i.estado === "activo").length,
+      curso_mas_popular: {
+        nombre: "Desarrollo Web Full Stack",
+        total_inscripciones: 2,
+      },
+    }
+    renderizarEstadisticas(statsEjemplo)
   }
+}
+
+function renderizarEstadisticas(stats) {
+  const container = document.getElementById("estadisticas-cards")
+
+  container.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <div class="stat-label">Total de Cursos</div>
+      <div class="stat-value">${stats.total_cursos}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-label">Total de Alumnos</div>
+      <div class="stat-value">${stats.total_alumnos}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-label">Inscripciones Activas</div>
+      <div class="stat-value">${stats.inscripciones_activas}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏆</div>
+      <div class="stat-label">Curso Más Popular</div>
+      <div class="stat-value" style="font-size: 18px;">${stats.curso_mas_popular?.nombre || "N/A"}</div>
+      <div class="stat-label">${stats.curso_mas_popular?.total_inscripciones || 0} inscripciones</div>
+    </div>
+  `
 }
 
 // ==================== FUNCIONES DE MODALES ====================
 
 async function mostrarModalNuevoCurso() {
+  if (!backendDisponible) {
+    mostrarToast("Función no disponible en modo demostración", "warning")
+    return
+  }
   document.getElementById("modal-nuevo-curso").classList.add("active")
 }
 
 async function mostrarModalNuevoAlumno() {
+  if (!backendDisponible) {
+    mostrarToast("Función no disponible en modo demostración", "warning")
+    return
+  }
   document.getElementById("modal-nuevo-alumno").classList.add("active")
 }
 
 async function mostrarModalNuevaInscripcion() {
+  if (!backendDisponible) {
+    mostrarToast("Función no disponible en modo demostración", "warning")
+    return
+  }
+
   // Cargar alumnos y cursos para los selects
   try {
     const [alumnosRes, cursosRes] = await Promise.all([fetch(`${API_URL}/api/alumnos`), fetch(`${API_URL}/api/cursos`)])
@@ -483,9 +634,11 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((res) => res.json())
     .then((data) => {
       console.log("✅ Conexión con backend:", data.message)
+      backendDisponible = true
     })
     .catch((error) => {
-      console.error("❌ Error de conexión con backend:", error)
-      console.log("ℹ️ Funcionando en modo de ejemplo sin backend")
+      console.error("❌ Backend no disponible:", error)
+      console.log("ℹ️ Funcionando en modo demostración con datos de ejemplo")
+      backendDisponible = false
     })
 })
